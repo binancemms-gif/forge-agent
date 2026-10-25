@@ -56,7 +56,7 @@ export function App() {
         {view === "tasks" && <Tasks tasks={tasks} addTask={addTask} toggleTask={toggleTask} />}
         {view === "terminal" && <TerminalPanel />}
         {view === "settings" && <SettingsPanel repoConnected={repoConnected} setRepoConnected={setRepoConnected} />}
-        <footer className="statusbar"><span><span className="status-dot" /> All systems operational</span><span className="status-meta">{files.length} files · Groq · Cloudflare D1</span><button className="deploy-button" onClick={() => setView("settings")}><Rocket /> Deploy</button></footer>
+        <footer className="statusbar"><span><span className="status-dot" /> All systems operational</span><span className="status-meta">{files.length} files · Groq · Neon Postgres</span><button className="deploy-button" onClick={() => setView("settings")}><Rocket /> Deploy</button></footer>
       </section>
     </div>
     <nav className="mobile-nav">{([["agent", Bot, "Agent"], ["editor", Code2, "Code"], ["preview", Play, "Preview"], ["tasks", Check, "Tasks"], ["settings", Settings, "Settings"]] as const).map(([key, Icon, label]) => <button key={key} className={view === key ? "active" : ""} onClick={() => setView(key)}><Icon /><small>{label}</small></button>)}</nav>
