@@ -6,8 +6,10 @@ export function useAgent() {
   const [messages, setMessages] = useState<AgentMessage[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
+  const [lastRequest, setLastRequest] = useState<{ content: string; workspace?: Record<string, string> }>();
   const transcript = useMemo(() => messages.filter((message) => message.role !== "system"), [messages]);
   const send = async (content: string, workspace?: Record<string, string>) => {
+    setLastRequest({ content, workspace });
     const next = [...messages, { role: "user" as const, content }];
     setMessages(next); setBusy(true); setError(undefined);
     try {
@@ -26,5 +28,6 @@ export function useAgent() {
     } catch (cause) { setError(typeof cause === "string" ? cause : cause instanceof Error ? cause.message : JSON.stringify(cause)); }
     finally { setBusy(false); }
   };
-  return { messages: transcript, busy, error, send };
+  const retry = () => lastRequest ? send(lastRequest.content, lastRequest.workspace) : undefined;
+  return { messages: transcript, busy, error, send, retry };
 }
