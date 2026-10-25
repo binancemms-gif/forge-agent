@@ -39,7 +39,7 @@ async function readAgentResponse(response: Response): Promise<AgentResponse> {
   const contentType = response.headers.get("content-type") || "";
   const body = await response.text();
   if (!contentType.includes("application/json")) {
-    const detail = body.replace(/\\s+/g, " ").trim().slice(0, 180);
+    const detail = body.replace(/\s+/g, " ").trim().slice(0, 180);
     throw new Error(response.status === 404
       ? "The agent API endpoint was not found. Start the Cloudflare Worker or configure VITE_API_BASE_URL."
       : `The agent API returned ${response.status || "an invalid"} non-JSON data${detail ? `: ${detail}` : "."}`);

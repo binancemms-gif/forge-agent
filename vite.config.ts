@@ -17,7 +17,8 @@ function localAgentApi(env: Record<string, string>): Plugin {
     configureServer(server) {
       server.middlewares.use("/api/agent", async (request, response) => {
         if (request.method !== "POST") { response.statusCode = 405; response.end(JSON.stringify({ error: "Method not allowed" })); return; }
-        if (!env.GROQ_API_KEY) { response.statusCode = 503; response.setHeader("content-type", "application/json"); response.end(JSON.stringify({ error: "GROQ_API_KEY is not configured for the local agent server." })); return; }
+        const groqApiKey = env.GROQ_API_KEY || env.GROQ_API;
+        if (!groqApiKey) { response.statusCode = 503; response.setHeader("content-type", "application/json"); response.end(JSON.stringify({ error: "GROQ_API_KEY is not configured for the local agent server." })); return; }
         let raw = "";
         for await (const chunk of request) raw += chunk;
         try {
@@ -26,7 +27,7 @@ function localAgentApi(env: Record<string, string>): Plugin {
           const workspace = body.workspace && typeof body.workspace === "object" ? body.workspace : {};
           const upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
-            headers: { "content-type": "application/json", authorization: `Bearer ${env.GROQ_API_KEY}` },
+            headers: { "content-type": "application/json", authorization: `Bearer ${groqApiKey}` },
             body: JSON.stringify({ model: MODEL, temperature: 0.2, max_completion_tokens: 2048, reasoning_effort: "low", stream: false, tools: agentTools, tool_choice: "auto", messages: [{ role: "system", content: `You are Forge, a friendly senior coding partner. Answer general questions conversationally, help research topics clearly, and help plan and implement coding tasks. Inspect the workspace before proposing edits, preserve existing architecture, explain changes, and never claim to have run a command or changed a file unless a tool result proves it. Workspace files: ${Object.keys(workspace).join(", ") || "none"}.` }, ...body.messages] }),
           });
           const text = await upstream.text();
